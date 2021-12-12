@@ -1,0 +1,171 @@
+
+--------------------------------
+
+Nx2x14x14
+
+(digit1,digit2)
+
+bool (<= lesser or equal)
+change into vector like [0,1] where first component is prob lesser or equal and second greater
+
+--------------------------------
+
+## Simple algorithm without auxiliary loss and weight sharing ##
+
+simple feature extractor : 
+2x14x14
+(0): Conv2d(1, 6, kernel_size=(3, 3), stride=(1, 1))
+6x12x12
+(1): ReLU (inplace)
+6x12x12
+(3): Conv2d(6, 16, kernel_size=(3, 3), stride=(1, 1))
+16x10x10
+(4): ReLU (inplace)
+16x10x10
+#########################
+(3): Conv2d(6, 16, kernel_size=(3, 3), stride=(1, 1))
+16x8x8
+(4): ReLU (inplace)
+16x8x8
+#########################
+(5): MaxPool2d (size=(2, 2), stride=(2, 2), dilation=(1, 1))
+16x4x4
+
+output.view(-1) --> 16x4x4=256
+
+regression ("lesser or equal")
+(0): Linear (256 -> 120)
+(1): ReLU (inplace)
+(2): Linear (120 -> 32)
+(3): ReLU (inplace)
+(4): Linear (32 -> 2)
+
+--------------------------------
+input = Nx2x14x14
+pic_1= Nx1x14x14
+pic_2= Nx1x14x14
+
+pic_1 -> bloc1 -> feature_1
+pic_2 -> bloc2 -> feature_2
+
+# share wheight between bloc1 and bloc2
+
+bloc 1&2 :
+simple feature extractor : 
+2x14x14
+(0): Conv2d(1, 6, kernel_size=(3, 3), stride=(1, 1))
+6x12x12
+(1): ReLU (inplace)
+6x12x12
+(3): Conv2d(6, 16, kernel_size=(3, 3), stride=(1, 1))
+16x10x10
+(4): ReLU (inplace)
+16x10x10
+#########################
+(3): Conv2d(6, 16, kernel_size=(3, 3), stride=(1, 1))
+16x8x8
+(4): ReLU (inplace)
+16x8x8
+#########################
+(5): MaxPool2d (size=(2, 2), stride=(2, 2), dilation=(1, 1))
+16x4x4
+
+output.view(-1) --> 16x4x4=256
+
+regression ("lesser or equal")
+(0): Linear (512 -> 256)
+(1): ReLU (inplace)
+(2): Linear (256 -> 128)
+(3): ReLU (inplace)
+(4): Linear (128 -> 86)
+(5): ReLU (inplace)
+(6): Linear (128 -> 86)
+
+# weight sharing
+
+"option 1"
+class Net(nn.Module):
+	def __init__(self):
+		super().__init__()
+		self.w=nn.Parameter(torch.empty((3,3)).uniform_(-1/math.sqrt(196),1/math.sqrt(196)))
+		self.conv_bloc1_1 = nn.Conv2d(1, 6, kernel_size=(3,3)))
+		self.conv_bloc2_1 = nn.Conv2d(6, 16, kernel_size=(3,3))
+		. . .
+	def forward(self, x):
+		self.conv_bloc1_1.weight=self.w
+		self.conv_bloc2_1.weight=self.w
+		. . .
+		pic_1= . . .
+		pic_2= . . .
+
+		feature_1=bloc1().view(-1,256)
+		feature_2=bloc2().view(-1,256)
+
+		merge feature into one again
+		feature= Nx(256+256)=Mx[feature_1,feature_2]
+
+		regresssion . . . 
+
+"option 2"
+class Net(nn.Module):
+	def __init__(self):
+		super().__init__()
+		self.conv_bloc1_1 = nn.Conv2d(1, 6, kernel_size=(3,3)))
+		self.conv_bloc2_1 = nn.Conv2d(6, 16, kernel_size=(3,3))
+		. . .
+	def forward(self, x):
+		self.conv_bloc1_1.weight=self.conv_bloc2_1.weight
+		. . .
+		pic_1= . . .
+		pic_2= . . .
+
+		feature_1=bloc1().view(-1,256)
+		feature_2=bloc2().view(-1,256)
+
+		merge feature into one again
+		feature= Nx(256+256)=Mx[feature_1,feature_2]
+
+		regresssion . . . 
+
+--------------------------------
+
+# Auxiliary loss without weight sharing
+
+/!\ at the end of the block add a classifier for each digit
+
+neuralNetwork=Module()
+
+train
+output, aux1_output, aux2_output =neuralNetwork(X)
+
+loss1=criterion(output,bool)
+loss2=criterion(aux1_output,digit1)
+loss3=criterion(aux2_output,digit2)
+
+loss=loss1+loss2+loss3
+
+--------------------------------
+
+# Auxiliary loss with weight sharing
+
+/!\ at the end of the block add a classifier for each digit also share the weight
+
+neuralNetwork=Module()
+
+train
+output, aux1_output, aux2_output =neuralNetwork(X)
+
+loss1=criterion(output,bool)
+loss2=criterion(aux1_output,digit1)
+loss3=criterion(aux2_output,digit2)
+
+loss=loss1+loss2+loss3
+
+--------------------------------
+
+SPLITTING WORK
+
+1-4 == Anand
+
+
+2-3 == Julien

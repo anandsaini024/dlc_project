@@ -1,0 +1,150 @@
+Nx1x1x2
+
+3 hidden layers of 25 units
+sigma=activation function Relu or Tanh
+
+Architecture
+{
+linear(2,25)
+sigma()
+linear(25,25)
+sigma()
+linear(24,1)
+sigma()
+}
+
+class linear ( object ) :
+	def __init__(self,input,output) :
+		self.weight= U(-1/sqrt(input),1/sqrt(input))
+		self.bias= [0,0,0, ... ,0] size of output
+		
+		self.weight_grad = set to 0
+		self.bias_grad = set to 0
+		self.input_grad = set to 0
+	
+	def forward ( self , * input, reset_grad = True ) :
+		if reset_grad == True:
+			self.resetGrad
+		self.X=input 
+		return input @ self.weight.T + self.bias
+	
+	def resetGrad(self):
+		grad to 0 again
+	
+	def backward ( self , * gradwrtoutput , index) :
+		# grad of weight
+		self.weight_grad += gradwrtoutput @ something >>> ????? index
+
+		# grad of bias
+		gradwrtoutput
+
+		# grad of input
+		self.weight.T
+
+	def update(self,learning_rate):
+		parameters -= learning_rate * self.grad
+
+	def param ( self ) :
+		return [(self.weight,self.weight_grad),(self.bias,self.bias_grad)]
+
+def maximumm(x)
+	return max(0,x)
+
+class Relu ( object ) :
+	def __init__(self) :
+	def forward ( self , * input , reset_grad = True ) :
+		if reset_grad == True:
+			self.resetGrad
+		out = max(0,x)
+		self.out=out
+		return out
+
+	def resetGrad(self):
+			grad to 0 again
+
+	def backward ( self , * gradwrtoutput , index) :
+		tensor of same shape of X[index]
+		with 0 if max is 0
+		with 1 if max is 1
+		return grad
+	def update(self,learning_rate):
+		return
+	def param ( self ) :
+		return []
+
+def tanh_prime(x)
+	return 1-math.tanh(x)**2
+
+class Tanh ( object ) :
+	def forward ( self , * input , reset_grad = True ) :
+		if reset_grad == True:
+			self.resetGrad
+		self.input = input
+		return input.Tanh
+	def resetGrad(self):
+		grad to 0 again
+	def backward ( self , * gradwrtoutput, index ) :
+		return gradwrtoutput * self.input[index].apply_(tanh_prime)
+	def update(self,learning_rate)
+		return
+	def param ( self ) :
+		return []
+
+class MSE ( object ) :
+	def __init__(self) :
+	def forward ( self , * input ) : #input consist of y_pred and y (true value)
+		self.y=y
+		self.y_pred=y_pred
+		return ((y-y_pred)**2).mean()
+	def backward ( self , * gradwrtoutput,index) :
+		know derivative of MSE
+		return derivative
+	def param ( self ) :
+		return []
+
+class Sequential ( object ) :
+	def __init__(self, *input) :
+		self.sequence= list(function feed in input)
+	def forward ( self , * input ) :
+		out=X
+		for f in range(len(self.sequence))
+			out=f(out)
+		return out
+	def backward ( self , * gradwrtoutput,index ) : #gradient of the loss function as input
+		grad=gradwrtoutput
+		for f in sequence starting from the end
+			grad=f.backward(gradwrtoutput,index)
+	def update(self,learning_rate)
+		for f in range(len(self.sequence))
+			f.update(learning_rate)
+		parameters -= learning_rate * self.grad
+	def param ( self ) :
+		return []
+
+class Module ( object ) :
+	def __init__(self,learning_rate,number of layers,. . .) :
+		... auto generate ...
+		input : n layers, layers dimension [. ,. ,. ,...], activation function
+		create the neural network
+		.....................
+		create seq=Sequence(functions ...)
+	def forward ( self , * input ) :
+		reuturn seq.forward(input)
+	def backward ( self , * gradwrtoutput ) :
+		for i index:
+			grad=MSE.backward()
+			seq.backward()
+	def update_parameters()
+		self.backward()
+		seq.update(self.learning_rate)
+	def param ( self ) :
+		return []
+
+
+6 class to implement 
+
+
+3-3
+
+Relu - Sequential - Linear --> Anand
+tanh - Module - MSE --> Julien
