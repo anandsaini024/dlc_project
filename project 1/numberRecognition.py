@@ -17,12 +17,33 @@ class Rnumber(nn.Module):
     def __init__(self):
         super().__init__()
         
-        self.superRes=nn.ConvTranspose2d(1, 6, kernel_size=(2,2), stride=(2,2))
+        self.encoder=nn.Sequential(
+            #14x14
+            nn.Conv2d(1, 32, kernel_size=(5,5)),
+            nn.ReLU(True),
+            nn.Conv2d(32,32,kernel_size=(5,5))
+            #6x6
+            )
+        
+        self.decoder=nn.Sequential(
+            #6x6
+            nn.ConvTranspose2d(32, 32, kernel_size=(4,4)),
+            nn.ReLU(True),
+            #9x9
+            nn.ConvTranspose2d(32, 32, kernel_size=(4,4)),
+            nn.ReLU(True),
+            #12x12
+            nn.ConvTranspose2d(32, 32, kernel_size=(4,4),stride=(2,2)),
+            nn.ReLU(True),
+            #26x26
+            nn.ConvTranspose2d(32, 1, kernel_size=(3,3))
+            #28,28
+            )
         
         #feature extraction
         self.bloc=nn.Sequential(
             #Nx1x14x14
-            nn.Conv2d(6,6,kernel_size=(5,5)),
+            nn.Conv2d(1,6,kernel_size=(5,5)),
             #Nx16x12x12
             nn.ReLU(True),
             nn.MaxPool2d(kernel_size=(2,2)),
@@ -30,7 +51,7 @@ class Rnumber(nn.Module):
             nn.Conv2d(6,16,kernel_size=(5,5)),
             #Nx32x4x4
             nn.ReLU(True),
-            nn.MaxPool2d(kernel_size=(2,2))
+            nn.MaxPool2d(kernel_size=(2,2),)
             #Nx32x2x2
             )
         
@@ -48,7 +69,8 @@ class Rnumber(nn.Module):
             )
     
     def forward(self,x): #Nx1x14x14
-        out=self.superRes(x)    
+        out=self.encoder(x)
+        out=self.decoder(out)
         out=self.bloc(out)
         out=out.view(x.size(0),-1)
         out=self.classification(out)
@@ -83,7 +105,7 @@ if __name__ == '__main__':
     
     #training
     criterion=nn.MSELoss()
-    optimizer=optim.SGD(model.parameters(),lr=0.01)
+    optimizer=optim.SGD(model.parameters(),lr=0.1)
 
     
     batch_size,nb_epochs=100,25
