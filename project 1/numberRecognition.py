@@ -19,27 +19,20 @@ class Rnumber(nn.Module):
         
         self.encoder=nn.Sequential(
             #14x14
-            nn.Conv2d(1, 32, kernel_size=(5,5)),
+            nn.Conv2d(1, 32, kernel_size=(3,3)),
             nn.ReLU(True),
-            nn.Conv2d(32,32,kernel_size=(5,5))
-            #6x6
+            nn.Conv2d(32,16,kernel_size=(4,4)),
+            nn.ReLU(True),
+            nn.Conv2d(16,16,kernel_size=(4,4))
             )
         
         self.decoder=nn.Sequential(
             #6x6
-            nn.ConvTranspose2d(32, 32, kernel_size=(4,4)),
+            nn.ConvTranspose2d(16, 16, kernel_size=(4,4),stride=(2,2)),
             nn.ReLU(True),
-            #9x9
-            nn.ConvTranspose2d(32, 32, kernel_size=(4,4)),
-            nn.ReLU(True),
-            #12x12
-            nn.ConvTranspose2d(32, 32, kernel_size=(4,4),stride=(2,2)),
-            nn.ReLU(True),
-            #26x26
-            nn.ConvTranspose2d(32, 1, kernel_size=(3,3))
-            #28,28
+            nn.ConvTranspose2d(16, 1, kernel_size=(2,2),stride=(2,2))
+            #28x28
             )
-        
         #feature extraction
         self.bloc=nn.Sequential(
             #Nx1x14x14
@@ -105,7 +98,7 @@ if __name__ == '__main__':
     
     #training
     criterion=nn.MSELoss()
-    optimizer=optim.SGD(model.parameters(),lr=0.1)
+    optimizer=optim.SGD(model.parameters(),lr=0.01,momentum=0.9)
 
     
     batch_size,nb_epochs=100,25
