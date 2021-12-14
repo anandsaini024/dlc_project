@@ -17,37 +17,40 @@ class Rnumber(nn.Module):
     def __init__(self):
         super().__init__()
         
+        self.superRes=nn.ConvTranspose2d(1, 6, kernel_size=(2,2), stride=(2,2))
+        
         #feature extraction
         self.bloc=nn.Sequential(
             #Nx1x14x14
-            nn.Conv2d(1,6,kernel_size=(3,3)),
-            #Nx6x12x12
+            nn.Conv2d(6,6,kernel_size=(5,5)),
+            #Nx16x12x12
             nn.ReLU(True),
             nn.MaxPool2d(kernel_size=(2,2)),
-            #Nx6x6x6
-            nn.Conv2d(6,16,kernel_size=(3,3)),
-            #Nx16x4x4
+            #Nx16x6x6
+            nn.Conv2d(6,16,kernel_size=(5,5)),
+            #Nx32x4x4
             nn.ReLU(True),
             nn.MaxPool2d(kernel_size=(2,2))
-            #Nx16x2x2
+            #Nx32x2x2
             )
         
         #number classification
         self.classification=nn.Sequential(
             #64
-            nn.Linear(64,42),
+            nn.Linear(256,120),
             nn.ReLU(True),
             #42
-            nn.Linear(42,32),
+            nn.Linear(120,84),
             nn.ReLU(True),
             #24
-            nn.Linear(32,10)
+            nn.Linear(84,10)
             #10
             )
     
     def forward(self,x): #Nx1x14x14
-        out=self.bloc(x)
-        out=out.view(-1,64)
+        out=self.superRes(x)    
+        out=self.bloc(out)
+        out=out.view(x.size(0),-1)
         out=self.classification(out)
         return out
 
