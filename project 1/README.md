@@ -1,5 +1,5 @@
 # Programs for project
-weightSharing.py
+weightSharing.py\\
 auxloss.py
 
 # interesting model
