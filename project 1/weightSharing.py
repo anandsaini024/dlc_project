@@ -9,60 +9,20 @@ import dlc_practical_prologue as prologue
 import torch
 import torch.nn as nn
 import torch.optim as optim
-
-class feature(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.encoder=nn.Sequential(
-            #14x14
-            nn.Conv2d(1, 32, kernel_size=(3,3)),
-            nn.ReLU(True),
-            nn.Conv2d(32,16,kernel_size=(4,4)),
-            nn.ReLU(True),
-            nn.Conv2d(16,16,kernel_size=(4,4))
-            )
-        
-        self.decoder=nn.Sequential(
-            #6x6
-            nn.ConvTranspose2d(16, 16, kernel_size=(4,4),stride=(2,2)),
-            nn.ReLU(True),
-            nn.ConvTranspose2d(16, 1, kernel_size=(2,2),stride=(2,2))
-            #28x28
-            )
-        #feature extraction
-        self.bloc=nn.Sequential(
-            #Nx1x28x28
-            nn.Conv2d(1,6,kernel_size=(5,5)),
-            #Nx6x24x24
-            nn.ReLU(True),
-            nn.MaxPool2d(kernel_size=(2,2)),
-            #Nx6x12x12
-            nn.Conv2d(6,16,kernel_size=(5,5)),
-            #Nx12x8x8
-            nn.ReLU(True),
-            nn.MaxPool2d(kernel_size=(2,2),)
-            #Nx12x4x4
-            )
-    def forward(self,x):
-        out=self.encoder(x)
-        out=self.decoder(out)
-        out=self.bloc(out)
-        return out
+from number2 import Rnumber
 
 class LesserWS(nn.Module):
     def __init__(self):
         super().__init__()
         
-        self.num=feature()
+        self.num=Rnumber()
         
         self.lesser=nn.Sequential(
-            nn.Linear(512,120),
+            nn.Linear(20,12),
             nn.ReLU(True),
-            nn.Linear(120,32),
+            nn.Linear(12,8),
             nn.ReLU(True),
-            nn.Linear(32,20),
-            nn.ReLU(True),
-            nn.Linear(20,1)
+            nn.Linear(8,2)
             )
         
     def forward(self,x): #Nx2x14x14
@@ -71,26 +31,36 @@ class LesserWS(nn.Module):
         c2=self.num(im2)
         out=torch.cat((c1,c2),1).view((x.size(0),-1))
         out=self.lesser(out)
-        return out.view(-1)
+        return out
+
+def classification(x):
+    out=torch.full([x.size(0),2],0)
+    for i in range(x.size(0)):
+        out[i,x[i].item()]=1
+    return out
 
 def lesser(x):
-    if x>0.5:
-        return 1
-    return 0
+    out=torch.full([x.size(0)],0)
+    for i in range(x.size(0)):
+        out[i]=x[i].argmax()
+    return out
 
 if __name__ == '__main__':
     n=1000
     train_input, train_target, train_classes, test_input, test_target,\
         test_classes=prologue.generate_pair_sets(n)
     
-    train_target=train_target.type(torch.FloatTensor)
-    test_target=test_target.type(torch.FloatTensor)
+    train_target=classification(train_target).type(torch.FloatTensor)
+    
+    train_input/=255.0
+    test_input/=255.0
+    
     
     model=LesserWS()
     
     #training
     criterion=nn.MSELoss()
-    optimizer=optim.SGD(model.parameters(),lr=0.001,momentum=0.9)
+    optimizer=optim.Adam(model.parameters())
 
     batch_size,nb_epochs=100,25
     
@@ -111,9 +81,9 @@ if __name__ == '__main__':
     
     y_pred=model(test_input)
     
-    b_pred=y_pred.detach().apply_(lesser)
+    lesser_pred=lesser(y_pred)
     
-    error=(test_target!=b_pred).sum()/n
+    error=(test_target!=lesser_pred).sum()/n
     
     print('error = {}'.format(error.item()))
     
