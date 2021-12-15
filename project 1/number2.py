@@ -14,45 +14,52 @@ class Rnumber(nn.Module):
     def __init__(self):
         super().__init__()
         
+        # increase resolution
         self.w=torch.tensor([[[[1.,1.],[1.,1.]]]])
         self.w2=torch.full((1,1,3,3),1/32)
         self.w2[0,0,1,1]=3/4
         
         #feature extraction
         self.bloc=nn.Sequential(
-            #Nx1x14x14
+            #Nx1x28x28
             nn.Conv2d(1,6,kernel_size=(5,5)),
-            #Nx6x12x12
+            #Nx6x24x24
             nn.ReLU(True),
             nn.MaxPool2d(kernel_size=(2,2)),
-            #Nx6x6x6
+            #Nx6x12x12
             nn.Conv2d(6,16,kernel_size=(5,5)),
-            #Nx16x4x4
+            #Nx16x8x8
             nn.ReLU(True),
             nn.MaxPool2d(kernel_size=(2,2))
-            #Nx32x2x2
+            #Nx16x4x4
             )
         
         #number classification
         self.classification=nn.Sequential(
-            #64
+            #Nx256
             nn.Linear(256,120),
             nn.ReLU(True),
-            #42
+            #Nx120
             nn.Linear(120,84),
             nn.ReLU(True),
-            #24
+            #Nx84
             nn.Linear(84,10)
-            #10
+            #Nx10
             )
     
     def forward(self,x): #Nx1x14x14
+        # version 1    
         out=F.conv_transpose2d(x,self.w,stride=(2,2))
+        #Nx1x28x28
         out=F.conv2d(out,self.w2,padding=1)
-        out=F.threshold(out,out.max()/4,0)
+        #Nx1x28x28
+        out=F.threshold(out,1/3,0)
+        #Nx1x28x28
         out=self.bloc(out)
+        #Nx16x4x4
         out=out.view(x.size(0),-1)
         out=self.classification(out)
+        #Nx10
         return out
 
 def classification(x):
@@ -72,11 +79,11 @@ if __name__ == '__main__':
     train_input, train_target, train_classes, test_input, test_target,\
         test_classes=prologue.generate_pair_sets(n)
     
-    number_train=train_input.view(-1,1,14,14)/255.
+    number_train=train_input.view(-1,1,14,14)/255.0
     n_train=train_classes.view(-1)
     y_train=classification(n_train).type(torch.FloatTensor)
     
-    number_test=test_input.view(-1,1,14,14)
+    number_test=test_input.view(-1,1,14,14)/255.0
     n_test=test_classes.view(-1)
     y_test=classification(n_test).type(torch.FloatTensor)
     
@@ -104,7 +111,7 @@ if __name__ == '__main__':
             loss.backward()
             optimizer.step()
         
-    y_pred=model(number_test/255)
+    y_pred=model(number_test)
     
     loss=criterion(y_pred,y_test)
     
