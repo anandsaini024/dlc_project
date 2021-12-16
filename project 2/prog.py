@@ -7,7 +7,8 @@ class linear(object):
         return
     def backward(self):
         return
-
+    def zero_grad(self):
+        return
 
 def tanh_prime(x):
     return 1-math.tanh(x)**2
@@ -16,15 +17,15 @@ class tahn(object):
     def forward(self,X,reset_grad):
         return X.tanh()
     
-    def resetGrad(self):
-        return
-    
     def backward(self,index,*gradwrtoutput):
         grad=[]
         for g in gradwrtoutput:
             gradwrtoutput*self.input[index].apply_(tanh_prime)
         return grad
-
+    
+    def zero_grad(self):
+        return
+    
     def param(self):
         return []
 
@@ -42,16 +43,22 @@ class MSE(object):
         return []
 
 class Module(object):
-    def forward(self,*input):
-        return
+    def __init__(self):
+        self.seq
+    
+    def forward(self,X):
+        return self.seq(X)
     
     def backward(self,*gradwrtoutput):
         self.seq.backward(*gradwrtoutput)
 
+    def zero_grad(self):
+        self.seq.zero_grad()
+
     def param(self):
         return self.seq.param(self)
 
-def optim(self):
+class OptimSGD(object):
     def __init__(self,method,learning_rate):
         self.method=method
         self.learning_rate
@@ -59,4 +66,5 @@ def optim(self):
         parameters=self.method.param()
         for p,g in parameters:
             p-=self.learning_rate*g
-        self.method.resetGrad()
+    def zero_grad(self):
+        self.method.zero_grad()
