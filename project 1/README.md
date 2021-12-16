@@ -9,6 +9,9 @@ then run LeNet on it
 Upscale idea :  
 double the pixel then make the images smoother then apply a threshold to have good edges
 
+## number4
+Revisited LeNET to work on 14x14 images
+
 ## nMNIST
 LeNet on MNIST data (28x28 images)
 
