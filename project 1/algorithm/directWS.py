@@ -12,7 +12,7 @@ import dlc_practical_prologue as prologue
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from number2 import Rnumber
+from number4 import Rnumber
 
 class LesserWS(nn.Module):
     def __init__(self):
