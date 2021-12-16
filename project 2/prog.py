@@ -3,6 +3,9 @@ import math
 
 
 class linear(object):
+    def __init__(self,in_features,out_features):
+        self.weight=0
+        self.bias=0
     def forward(self):
         return
     def backward(self):
@@ -30,10 +33,13 @@ class tahn(object):
         return []
 
 class MSE(object):
-    def forward(self,*input,y,y_pred):
-        self.y=y
-        self.y_pred=y_pred
+    def forward(self,y,y_pred):
         return ((y-y_pred)**2).mean()
+    
+    def __call__(self,target,pred):
+        self.y=target
+        self.y_pred=pred
+        return self.forward(y, y_pred)
     
     def backward(self):
         grad=(2/self.y_pred.size(0))*(self.y_pred-self.y)
@@ -42,12 +48,26 @@ class MSE(object):
     def param(self):
         return []
 
+class Sequential(object):
+    def __init__(self,*chain):
+        self.chain=chain
+    def forward(self,X):
+        return
+    
+    def __call__(self,X):
+        return self.forward(X)
+
 class Module(object):
-    def __init__(self):
-        self.seq
+    def __init__(self,):
+        chain=[]
+        for i in 
+        self.seq=Sequential(*chain)
     
     def forward(self,X):
         return self.seq(X)
+    
+    def __call__(self,X):
+        return self.forward(X)
     
     def backward(self,*gradwrtoutput):
         self.seq.backward(*gradwrtoutput)
