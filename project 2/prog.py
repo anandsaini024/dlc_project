@@ -62,7 +62,7 @@ class Sequential(object):
         return self.forward(X)
 
 class Module(object):
-    def __init__(self,*hidden_layers,in_features=2,out_features=1,ReLU=True):
+    def __init__(self,*hidden_layers,in_features=2,out_features=1,ReLU=False):
         if len(hidden_layers)==0:
             hidden_layers=[25,25,25]
         if ReLU==False:
@@ -102,3 +102,49 @@ class OptimSGD(object):
             p-=self.learning_rate*g
     def zero_grad(self):
         self.method.zero_grad()
+
+def inDisk(data):
+    N=data.size(0)
+    center=torch.tensor([0.5,0.5])
+    D=(data-center).norm(2,1)
+    out=torch.full([N],0.)
+    out[D<=1/math.sqrt(2*math.pi)]=1.
+    return out
+
+if __name__== '__main__':
+    
+    ## generate data
+    
+    N=1000
+    
+    data_train=torch.empty((N,2)).uniform_(0,1)
+    data_test=torch.empty((N,2)).uniform_(0,1)
+    
+    train_target=inDisk(data_train)
+    test_target=inDisk(data_test)
+    
+    # no need to normalize we're in [0,1]**2
+    
+    ## learning
+    
+    model=Module()
+    criterion=MSE()
+    optimizer=OptimSGD(model, learning_rate=0.001)
+    
+    batch_size,nb_epochs=100,25
+    
+    data_BTrain=data_train.split(batch_size)
+    BTarget=train_target.split(batch_size)
+    
+    n_batch=len(BTarget)
+    
+    while nb_epochs>0:
+        nb_epochs-=1
+        for i in range(n_batch):
+            optimizer.zero_grad()
+            b_pred=model(data_BTrain[i])
+            loss=criterion(BTarget[i], b_pred)
+            criterion.backward()
+            optimizer.step()
+        print(loss.item())
+        
