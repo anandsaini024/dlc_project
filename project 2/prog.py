@@ -3,12 +3,18 @@ import math
 
 
 class Linear(object):
+    """
+    Linear module with input/output of dim in_features/out_features
+    """
     def __init__(self,in_features,out_features):
         self.weight=0
         self.bias=0
-    def forward(self):
+    def forward(self,X):
         return
-    def backward(self):
+    def __call__(self,X):
+        self.X=X
+        return self.forward(X)
+    def backward(self,*gradwrtoutput):
         return
     def zero_grad(self):
         return
@@ -17,13 +23,22 @@ def tanh_prime(x):
     return 1-math.tanh(x)**2
 
 class Tahn(object):
-    def forward(self,X,reset_grad):
+    """
+    Tahn activation function
+    """
+    def forward(self,X):
         return X.tanh()
     
-    def backward(self,index,*gradwrtoutput):
+    def __call__(self,X):
+        self.input=X
+        return self.forward(self,X)
+    
+    def backward(self,*gradwrtoutput):
         grad=[]
+        index=0
         for g in gradwrtoutput:
             gradwrtoutput*self.input[index].apply_(tanh_prime)
+            index+=1
         return grad
     
     def zero_grad(self):
@@ -33,10 +48,16 @@ class Tahn(object):
         return []
 
 class ReLU(object):
+    """
+    ReLU activation funciton
+    """
     def forward(self,X):
         return
 
 class MSE(object):
+    """
+    compute MSE loss function and get gradient
+    """
     def forward(self):
         return ((self.y-self.y_pred)**2).mean()
     
@@ -53,6 +74,9 @@ class MSE(object):
         return []
 
 class Sequential(object):
+    """
+    Create a NN that just chain the module given in initialisation
+    """
     def __init__(self,*chain):
         self.chain=chain
     
@@ -66,6 +90,10 @@ class Sequential(object):
         return
 
 class Module(object):
+    """
+    create a NN module, where hidden_layers describe the size of its inner
+    layer and in_features/out_features the size of the input/output.
+    """
     def __init__(self,*hidden_layers,in_features=2,out_features=1,ReLU=False):
         if len(hidden_layers)==0:
             hidden_layers=[25,25,25]
@@ -97,6 +125,9 @@ class Module(object):
         return self.seq.param(self)
 
 class OptimSGD(object):
+    """
+    Optimization of a module using SGD
+    """
     def __init__(self,method,learning_rate):
         self.method=method
         self.learning_rate=learning_rate
@@ -108,6 +139,10 @@ class OptimSGD(object):
         self.method.zero_grad()
 
 def inDisk(data):
+    """
+    get data in [0,1]**2 and return it's classification 
+    (1 if in, 0 if out of the disk)
+    """
     N=data.size(0)
     center=torch.tensor([0.5,0.5])
     D=(data-center).norm(2,1)
@@ -116,6 +151,9 @@ def inDisk(data):
     return out
 
 def prediction(data):
+    """
+    get the output of a NN and return the correct class
+    """
     out=torch.full(data.size(0),0)
     out[data>=0.5]=1
     return out
@@ -153,7 +191,8 @@ if __name__== '__main__':
             optimizer.zero_grad()
             b_pred=model(data_BTrain[i])
             loss=criterion(BTarget[i], b_pred)
-            criterion.backward()
+            grad=criterion.backward()
+            model.backward(*grad)
             optimizer.step()
         print(loss.item())
     
