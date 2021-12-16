@@ -2,7 +2,7 @@ import torch
 import math
 
 
-class linear(object):
+class Linear(object):
     def __init__(self,in_features,out_features):
         self.weight=0
         self.bias=0
@@ -16,7 +16,7 @@ class linear(object):
 def tanh_prime(x):
     return 1-math.tanh(x)**2
 
-class tahn(object):
+class Tahn(object):
     def forward(self,X,reset_grad):
         return X.tanh()
     
@@ -32,14 +32,18 @@ class tahn(object):
     def param(self):
         return []
 
+class ReLU(object):
+    def forward(self,X):
+        return
+
 class MSE(object):
-    def forward(self,y,y_pred):
-        return ((y-y_pred)**2).mean()
+    def forward(self):
+        return ((self.y-self.y_pred)**2).mean()
     
     def __call__(self,target,pred):
         self.y=target
         self.y_pred=pred
-        return self.forward(y, y_pred)
+        return self.forward()
     
     def backward(self):
         grad=(2/self.y_pred.size(0))*(self.y_pred-self.y)
@@ -58,9 +62,19 @@ class Sequential(object):
         return self.forward(X)
 
 class Module(object):
-    def __init__(self,):
-        chain=[]
-        for i in 
+    def __init__(self,*hidden_layers,in_features=2,out_features=1,ReLU=True):
+        if len(hidden_layers)==0:
+            hidden_layers=[25,25,25]
+        if ReLU==False:
+            fa=Tahn()
+        else:
+            fa=ReLU()
+        chain=[Linear(in_features,hidden_layers[0])]
+        chain+=[fa]
+        for i in len(hidden_layers)-1:
+            chain+=[Linear(hidden_layers[i],hidden_layers[i+1])]
+            chain+=[fa]
+        chain+=[Linear(hidden_layers[-1],out_features)]
         self.seq=Sequential(*chain)
     
     def forward(self,X):
