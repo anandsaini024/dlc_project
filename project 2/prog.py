@@ -55,11 +55,15 @@ class MSE(object):
 class Sequential(object):
     def __init__(self,*chain):
         self.chain=chain
+    
     def forward(self,X):
         return
     
     def __call__(self,X):
         return self.forward(X)
+    
+    def zero_grad(self):
+        return
 
 class Module(object):
     def __init__(self,*hidden_layers,in_features=2,out_features=1,ReLU=False):
@@ -71,7 +75,7 @@ class Module(object):
             fa=ReLU()
         chain=[Linear(in_features,hidden_layers[0])]
         chain+=[fa]
-        for i in len(hidden_layers)-1:
+        for i in range(len(hidden_layers)-1):
             chain+=[Linear(hidden_layers[i],hidden_layers[i+1])]
             chain+=[fa]
         chain+=[Linear(hidden_layers[-1],out_features)]
@@ -95,7 +99,7 @@ class Module(object):
 class OptimSGD(object):
     def __init__(self,method,learning_rate):
         self.method=method
-        self.learning_rate
+        self.learning_rate=learning_rate
     def step(self):
         parameters=self.method.param()
         for p,g in parameters:
@@ -111,6 +115,11 @@ def inDisk(data):
     out[D<=1/math.sqrt(2*math.pi)]=1.
     return out
 
+def prediction(data):
+    out=torch.full(data.size(0),0)
+    out[data>=0.5]=1
+    return out
+
 if __name__== '__main__':
     
     ## generate data
@@ -124,7 +133,7 @@ if __name__== '__main__':
     test_target=inDisk(data_test)
     
     # no need to normalize we're in [0,1]**2
-    
+    """
     ## learning
     
     model=Module()
@@ -147,4 +156,12 @@ if __name__== '__main__':
             criterion.backward()
             optimizer.step()
         print(loss.item())
-        
+    
+    test_pred=model(data_test)
+    
+    test_pred_class=prediction()
+    
+    error=(test_target!=test_pred_class).sum()/N
+    
+    print('error = {}'.format(error.item()))
+    """
