@@ -1,7 +1,7 @@
 ### Different architecture
 
 # Suffix
-AL - auxiliary loss
+AL - auxiliary loss  
 WS = weight sharing
 
 ## direct
