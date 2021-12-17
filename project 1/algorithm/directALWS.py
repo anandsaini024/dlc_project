@@ -17,31 +17,52 @@ class LesserWS(nn.Module):
     def __init__(self):
         super().__init__()
         
+        # Rnumber take #Nx1x14x14 as input
+        # and returns #Nx10
+        
         self.num=Rnumber()
         
+        
         self.lesser=nn.Sequential(
+            #Nx20
             nn.Linear(20,12),
+            #Nx12
             nn.ReLU(True),
             nn.Linear(12,8),
+            #Nx8
             nn.ReLU(True),
             nn.Linear(8,2)
+            #Nx2
             )
         
     def forward(self,x): #Nx2x14x14
+        # split into two images    
         im1, im2 = torch.split(x,1,1)
+        # do a classification on each
         c1=self.num(im1)
         c2=self.num(im2)
+        # merge them
         out=torch.cat((c1,c2),1).view((x.size(0),-1))
+        # find if the number 2 is lesser than number 1
         out=self.lesser(out)
+        # return auxiliary output c1 and c2 for auxiliary loss
         return out,c1,c2
 
 def classification(x,n):
+    """
+    transform a class index into a vector of classes.
+    Ex : 3 becomes [0,0,0,1,0,0,0,0,0,0]
+    """
     out=torch.full([x.size(0),n],0).float()
     for i in range(x.size(0)):
         out[i,x[i].item()]=1
     return out
 
 def lesser(x):
+    """
+    from a two dim vector pick the index of the element with biggest value.
+    Either return 1 or 0
+    """
     out=torch.full([x.size(0)],0)
     for i in range(x.size(0)):
         out[i]=x[i].argmax()
