@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Dec 14 18:06:22 2021
-
-@author: Julien
-"""
 
 import dlc_practical_prologue as prologue
 import torch

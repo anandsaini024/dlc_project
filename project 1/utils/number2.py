@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-
-@author: Julien
-"""
 
 import dlc_practical_prologue as prologue
 import torch
