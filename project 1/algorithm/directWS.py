@@ -1,9 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Dec 14 22:59:24 2021
 
-@author: Julien
-"""
 import os
 u=os.path.dirname(os.getcwd())+'\\utils'
 import sys

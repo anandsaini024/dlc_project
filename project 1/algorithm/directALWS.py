@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-@author: Julien
-"""
+
 import os
 u=os.path.dirname(os.getcwd())+'\\utils'
 import sys
