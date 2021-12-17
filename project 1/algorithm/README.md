@@ -7,7 +7,7 @@ ASYM = asymmetry
 
 ## direct
 
-try to solve by directly extracting features on each digit and then try yo get a classification
+try to solve by directly extracting features on each digit and then try yo get a classification of the digit
 
 ## simple Hres (SHres)
 
