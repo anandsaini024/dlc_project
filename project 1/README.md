@@ -1,6 +1,5 @@
 # Programs for project
-weightSharing.py  
-auxloss.py
+in algorithm folder
 
 # interesting model
 ## number2
