@@ -7,8 +7,8 @@ auxloss.py
 upscale data from 14x14 to 28x28
 then run LeNet on it  
 Upscale idea :  
-double the pixel then make the images smoother then apply a threshold to have good edges
-Nearest-neighbor interpolation with the scale of 2 article :
+double the pixel then make the images smoother then apply a threshold to have good edges  
+Nearest-neighbor interpolation with the scale of 2 article :  
 https://www.analyticsvidhya.com/blog/2021/05/deep-learning-for-image-super-resolution/
 
 ## number4
