@@ -48,27 +48,40 @@ class Rnumber(nn.Module):
             )
     
     def forward(self,x): #Nx1x14x14
-        # version 1    
+        # upsampling  
         out=F.conv_transpose2d(x,self.w,stride=(2,2))
         #Nx1x28x28
+        # smoothing
         out=F.conv2d(out,self.w2,padding=1)
         #Nx1x28x28
+        # edge sharpening
         out=F.threshold(out,1/3,0)
         #Nx1x28x28
         out=self.bloc(out)
         #Nx16x4x4
+        # bring all features into a one dim vector
         out=out.view(x.size(0),-1)
+        #Nx256
+        # classification of the number
         out=self.classification(out)
         #Nx10
         return out
 
 def classification(x):
+    """
+    transform a class index into a vector of classes.
+    Ex : 3 becomes [0,0,0,1,0,0,0,0,0,0]
+    """
     out=torch.full([x.size(0),10],0)
     for i in range(x.size(0)):
         out[i,x[i].item()]=1
     return out
 
 def number(x):
+    """
+    from of vector of classes, return the index of the biggest value.
+    Recover the number, from a vector of classes.
+    """
     out=torch.full([x.size(0)],0)
     for i in range(x.size(0)):
         out[i]=x[i].argmax()

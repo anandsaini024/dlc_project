@@ -15,14 +15,14 @@ class Rnumber(nn.Module):
         
         #feature extraction
         self.bloc=nn.Sequential(
-            #Nx1x28x28
+            #Nx1x14x14
             nn.Conv2d(1,6,kernel_size=(3,3),padding=1),
-            #Nx6x24x24
+            #Nx6x14x14
             nn.ReLU(True),
             nn.MaxPool2d(kernel_size=(2,2)),
-            #Nx6x12x12
+            #Nx6x7x7
             nn.Conv2d(6,16,kernel_size=(3,3),padding=2),
-            #Nx16x8x8
+            #Nx16x9x9 #one line unused
             nn.ReLU(True),
             nn.MaxPool2d(kernel_size=(2,2))
             #Nx16x4x4
@@ -42,21 +42,32 @@ class Rnumber(nn.Module):
             )
     
     def forward(self,x): #Nx1x14x14
-        #Nx1x28x28
+        # features extractor
         out=self.bloc(x)
         #Nx16x4x4
+        # bring all features into a one dim vector
         out=out.view(x.size(0),-1)
+        #Nx256
+        # classification of the number
         out=self.classification(out)
         #Nx10
         return out
 
 def classification(x):
+    """
+    transform a class index into a vector of classes.
+    Ex : 3 becomes [0,0,0,1,0,0,0,0,0,0]
+    """
     out=torch.full([x.size(0),10],0)
     for i in range(x.size(0)):
         out[i,x[i].item()]=1
     return out
 
 def number(x):
+    """
+    from of vector of classes, return the index of the biggest value.
+    Recover the number, from a vector of classes.
+    """
     out=torch.full([x.size(0)],0)
     for i in range(x.size(0)):
         out[i]=x[i].argmax()

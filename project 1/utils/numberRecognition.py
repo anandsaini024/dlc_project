@@ -14,65 +14,89 @@ class Rnumber(nn.Module):
     def __init__(self):
         super().__init__()
         
+        # encoder
         self.encoder=nn.Sequential(
-            #14x14
+            #Nx1x14x14
             nn.Conv2d(1, 32, kernel_size=(3,3)),
+            #Nx32x12x12
             nn.ReLU(True),
             nn.Conv2d(32,16,kernel_size=(4,4)),
+            #Nx16x9x9
             nn.ReLU(True),
             nn.Conv2d(16,16,kernel_size=(4,4))
+            #Nx16x6x6
             )
         
+        # decoder
         self.decoder=nn.Sequential(
-            #6x6
+            #Nx16x6x6
             nn.ConvTranspose2d(16, 16, kernel_size=(4,4),stride=(2,2)),
+            #Nx16x14x14
             nn.ReLU(True),
             nn.ConvTranspose2d(16, 1, kernel_size=(2,2),stride=(2,2))
-            #28x28
+            #Nx1x28x28
             )
-        #feature extraction
+        
+        # feature extraction
         self.bloc=nn.Sequential(
-            #Nx1x14x14
+            #Nx1x28x28
             nn.Conv2d(1,6,kernel_size=(5,5)),
-            #Nx16x12x12
+            #Nx6x24x24
             nn.ReLU(True),
             nn.MaxPool2d(kernel_size=(2,2)),
-            #Nx16x6x6
+            #Nx6x12x12
             nn.Conv2d(6,16,kernel_size=(5,5)),
-            #Nx32x4x4
+            #Nx16x8x8
             nn.ReLU(True),
             nn.MaxPool2d(kernel_size=(2,2),)
-            #Nx32x2x2
+            #Nx16x4x4
             )
         
         #number classification
         self.classification=nn.Sequential(
-            #64
+            #256
             nn.Linear(256,120),
             nn.ReLU(True),
-            #42
+            #120
             nn.Linear(120,84),
             nn.ReLU(True),
-            #24
+            #84
             nn.Linear(84,10)
             #10
             )
     
     def forward(self,x): #Nx1x14x14
+        # Pseudo encoder    
         out=self.encoder(x)
+        #Nx16x6x6
+        # decoder
         out=self.decoder(out)
+        #Nx1x28x28
+        # feature extraction
         out=self.bloc(out)
+        # bring all features into a one dim vector
         out=out.view(x.size(0),-1)
+        #Nx256
+        # classification of the number
         out=self.classification(out)
+        #Nx10
         return out
 
 def classification(x):
+    """
+    transform a class index into a vector of classes.
+    Ex : 3 becomes [0,0,0,1,0,0,0,0,0,0]
+    """
     out=torch.full([x.size(0),10],0)
     for i in range(x.size(0)):
         out[i,x[i].item()]=1
     return out
 
 def number(x):
+    """
+    from of vector of classes, return the index of the biggest value.
+    Recover the number, from a vector of classes.
+    """
     out=torch.full([x.size(0)],0)
     for i in range(x.size(0)):
         out[i]=x[i].argmax()
