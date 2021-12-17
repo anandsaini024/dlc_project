@@ -256,7 +256,6 @@ if __name__== '__main__':
     data_test/=s
     
     
-    # no need to normalize we're in [0,1]**2
     ## learning
     
     model=Module()
