@@ -2,7 +2,8 @@
 
 # Suffix
 AL - auxiliary loss  
-WS = weight sharing
+WS = weight sharing  
+ASYM = asymmetry
 
 ## direct
 
