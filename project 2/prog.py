@@ -1,7 +1,6 @@
 import torch
 import math
 
-
 class Linear(object):
     """
     Linear module with input/output of dim in_features/out_features
@@ -174,10 +173,10 @@ class Module(object):
     create a NN module, where hidden_layers describe the size of its inner
     layer and in_features/out_features the size of the input/output.
     """
-    def __init__(self,*hidden_layers,in_features=2,out_features=1,ReLU=False):
+    def __init__(self,*hidden_layers,in_features=2,out_features=1,relu=False):
         if len(hidden_layers)==0:
             hidden_layers=[25,25,25]
-        if ReLU==False:
+        if relu==False:
             fa=Tahn()
         else:
             fa=ReLU()
@@ -185,6 +184,10 @@ class Module(object):
         chain+=[fa]
         for i in range(len(hidden_layers)-1):
             chain+=[Linear(hidden_layers[i],hidden_layers[i+1])]
+            if ReLU==False:
+                fa=Tahn()
+            else:
+                fa=ReLU()
             chain+=[fa]
         chain+=[Linear(hidden_layers[-1],out_features)]
         self.seq=Sequential(*chain)
@@ -208,15 +211,15 @@ class OptimSGD(object):
     """
     Optimization of a module using SGD
     """
-    def __init__(self,method,learning_rate):
-        self.method=method
+    def __init__(self,model,learning_rate):
+        self.model=model
         self.learning_rate=learning_rate
     def step(self):
-        parameters=self.method.param()
+        parameters=self.model.param()
         for p,g in parameters:
             p-=self.learning_rate*g
     def zero_grad(self):
-        self.method.zero_grad()
+        self.model.zero_grad()
 
 def inDisk(data):
     """
@@ -250,7 +253,7 @@ if __name__== '__main__':
     train_target=inDisk(data_train)
     test_target=inDisk(data_test)
     
-    s=data_train.var(0)
+    s=data_train.var()
     
     data_train/=s
     data_test/=s
@@ -258,9 +261,9 @@ if __name__== '__main__':
     
     ## learning
     
-    model=Module()
+    model=Module(relu=False)
     criterion=MSE()
-    optimizer=OptimSGD(model, learning_rate=0.001)
+    optimizer=OptimSGD(model, learning_rate=0.01)
     
     batch_size,nb_epochs=100,25
     
@@ -279,7 +282,8 @@ if __name__== '__main__':
             grad=criterion.backward()
             model.backward(*grad)
             optimizer.step()
-        print(loss.item())
+        print("MSE-loss : {}".format(loss.item()))
+    
     
     test_pred=model(data_test)
     
