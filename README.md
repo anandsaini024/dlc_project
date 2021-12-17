@@ -1,4 +1,4 @@
-# Mini-project groupe T
+# Mini-project group T
 ## Project 1
 ## Project 2
 The goal of this project is to design a small deep learning framework without using "torch.nn", autograd and over advance lybrary.  
