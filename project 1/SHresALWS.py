@@ -23,7 +23,7 @@ class LesserWS(nn.Module):
             nn.Linear(8,2)
             )
         
-    def forward(self,x): #Nx2x14x14
+    def forward(self,x):
         im1, im2 = torch.split(x,1,1)
         c1=self.num(im1)
         c2=self.num(im2)
