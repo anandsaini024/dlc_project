@@ -10,7 +10,7 @@ import torch.optim as optim
 
 from number4 import Rnumber
 
-class LesserWS(nn.Module):
+class LesserALWS(nn.Module):
     def __init__(self):
         super().__init__()
         
@@ -64,6 +64,7 @@ def lesser(x):
     for i in range(x.size(0)):
         out[i]=x[i].argmax()
     return out
+    
 
 if __name__ == '__main__':
     n=1000
@@ -76,10 +77,10 @@ if __name__ == '__main__':
     test_input/=255.0
     
     
-    model=LesserWS()
+    model=LesserALWS()
     
     #training
-    criterion=nn.MSELoss()
+    criterion=nn.CrossEntropyLoss()
     optimizer=optim.Adam(model.parameters())
 
     batch_size,nb_epochs=100,25

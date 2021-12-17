@@ -75,7 +75,7 @@ if __name__ == '__main__':
     model=LesserWS()
     
     #training
-    criterion=nn.MSELoss()
+    criterion=nn.CrossEntropyLoss()
     optimizer=optim.Adam(model.parameters())
 
     batch_size,nb_epochs=100,25

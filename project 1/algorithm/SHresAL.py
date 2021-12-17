@@ -10,7 +10,7 @@ import torch.optim as optim
 
 from number2 import Rnumber
 
-class LesserWS(nn.Module):
+class LesserAL(nn.Module):
     def __init__(self):
         super().__init__()
         
@@ -69,16 +69,16 @@ if __name__ == '__main__':
     train_input, train_target, train_classes, test_input, test_target,\
         test_classes=prologue.generate_pair_sets(n)
     
-    train_target=classification(train_target,2).type(torch.FloatTensor)
+    train_target=classification(train_target,2)
     
     train_input/=255.0
     test_input/=255.0
     
     
-    model=LesserWS()
+    model=LesserAL()
     
     #training
-    criterion=nn.MSELoss()
+    criterion=nn.CrossEntropyLoss()
     optimizer=optim.Adam(model.parameters())
 
     batch_size,nb_epochs=100,25
